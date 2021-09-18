@@ -1,3 +1,17 @@
+<%= if @server_found do %>
+  <%= if @game.status == :not_started do %>
+  <h1>Waiting for other player to join!</h1>
+  <h1>Tell a friend to use this game code to join you!</h1>
+  <%= @game.code %>
+<% end %>
+
+<% else %>
+ <%= if @player do %>
+      <div class="mb-4 text-lg leading-6 font-medium text-gray-900 text-center">
+        Player: <span class="font-semibold"><%= @player.name %></span>
+      </div>
+    <% end %>
+
 <div class="form-section">
   <%= f = form_for :guess, "#", phx_change: "validate", phx_submit: "submit" %>
   <fieldset>
@@ -49,3 +63,5 @@
     </tbody>
   </table>
 </div>
+
+<% end %>

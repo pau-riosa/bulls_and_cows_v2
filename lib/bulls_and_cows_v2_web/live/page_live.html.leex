@@ -13,7 +13,11 @@
           <%= error_tag f, :name %>
         </div>
       </div>
-      <input class="button-primary" type="submit" value="Join">
+      <%= if new_game?(@changeset) do %>
+        <input class="button-primary" type="submit" value="New Game">
+      <% else %>
+        <input class="button-primary" type="submit" value="Join Game">
+      <% end %>
     </fieldset>
   </form>
 </div>

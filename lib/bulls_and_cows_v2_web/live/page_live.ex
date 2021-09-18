@@ -35,4 +35,8 @@ defmodule BullsAndCowsV2Web.PageLive do
 
     {:noreply, assign(socket, :changeset, changeset)}
   end
+
+  defp new_game?(changeset) do
+    Ecto.Changeset.get_field(changeset, :type) == :start
+  end
 end

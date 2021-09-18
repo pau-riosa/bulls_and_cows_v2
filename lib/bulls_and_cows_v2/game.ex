@@ -26,6 +26,14 @@ defmodule BullsAndCowsV2.Game do
     %Game{code: game_code, players: [player]}
   end
 
+  @doc """
+  Return the player from the game state found by the ID.
+  """
+  @spec get_player(t(), player_id :: String.t()) :: nil | Player.t()
+  def get_player(%Game{players: players} = _state, player_id) do
+    Enum.find(players, &(&1.id == player_id))
+  end
+
   # def join(%Game{players: players}) when length(players) == 2 do
   #   {:error, "No more players allowed"}
   # end

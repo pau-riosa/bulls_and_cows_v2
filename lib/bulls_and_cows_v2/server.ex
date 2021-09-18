@@ -100,6 +100,20 @@ defmodule BullsAndCowsV2.Server do
     |> Enum.join("")
   end
 
+  @doc """
+  Request and return the current game state.
+  """
+  @spec get_current_game_state(Game.game_code()) ::
+          Game.t() | {:error, String.t()}
+  def get_current_game_state(game_code) do
+    GenServer.call(via_tuple(game_code), :current_state)
+  end
+
+  @impl true
+  def handle_call(:current_state, _from, %Game{} = state) do
+    {:reply, state, state}
+  end
+
   # def join(id) do
   #   GenServer.call(via_tuple(id), :join)
   # end
