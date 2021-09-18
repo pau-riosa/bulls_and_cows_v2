@@ -16,8 +16,8 @@ defmodule BullsAndCowsV2.Application do
       # Start the PubSub system
       {Phoenix.PubSub, name: BullsAndCowsV2.PubSub},
       {Cluster.Supervisor, [topologies, [name: BullsAndCowsV2.ClusterSupervisor]]},
-      {Horde.Registry, [name: BullsAndCowsV2.GameRegistry, keys: :unique, members: :auto]},
-      {Horde.DynamicSupervisor,
+      {Registry, keys: :unique, name: BullsAndCowsV2.GameRegistry},
+      {DynamicSupervisor,
        [
          name: BullsAndCowsV2.DistributedSupervisor,
          shutdown: 1_000,

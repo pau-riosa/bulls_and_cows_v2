@@ -1,10 +1,9 @@
 defmodule BullsAndCowsV2.Game do
   @moduledoc false
   alias __MODULE__
-  alias BullsAndCowsV2.{Player, Rules}
+  alias BullsAndCowsV2.Player
 
   defstruct code: nil,
-            secret_number: nil,
             turn: nil,
             winner: nil,
             players: [],
@@ -18,12 +17,11 @@ defmodule BullsAndCowsV2.Game do
           players: [Player.t()],
           turn: nil | Player.t(),
           winner: nil | Player.t(),
-          over: Boolean.t(),
-          secret_number: Integer.t()
+          over: Boolean.t()
         }
 
   def new(game_code, %Player{} = player) do
-    %Game{code: game_code, players: [player]}
+    %Game{code: game_code, players: [player], turn: player}
   end
 
   @doc """
@@ -34,14 +32,45 @@ defmodule BullsAndCowsV2.Game do
     Enum.find(players, &(&1.id == player_id))
   end
 
-  # def join(%Game{players: players}) when length(players) == 2 do
-  #   {:error, "No more players allowed"}
-  # end
+  def join_game(%Game{players: []}, %Player{}) do
+    {:error, "Can only join a created game"}
+  end
 
-  # def join(%Game{players: players} = game) do
-  #   player = next_player(players)
-  #   {:ok, %{game | players: [player | players]}, player}
-  # end
+  def join_game(%Game{players: players}, %Player{}) when length(players) == 2 do
+    {:error, "Only 2 players allowed"}
+  end
+
+  def join_game(%Game{players: players} = game, %Player{} = player) do
+    {:ok, %{game | players: [player | players]}}
+  end
+
+  def update_player(game, new_player) do
+    players =
+      Enum.map(game.players, fn old_player ->
+        if old_player.name == new_player.name do
+          new_player
+        else
+          old_player
+        end
+      end)
+
+    IO.inspect(players)
+
+    %Game{game | players: players}
+  end
+
+  @doc """
+  Start the game.
+  """
+  @spec start(t()) :: {:ok, t()} | {:error, String.t()}
+  def start(%Game{status: :playing}), do: {:error, "Game in play"}
+  def start(%Game{status: :done}), do: {:error, "Game is done"}
+
+  def start(%Game{status: :not_started, players: [_p1, _p2]} = state) do
+    {:ok, %Game{state | status: :playing}}
+  end
+
+  def start(%Game{players: _players}), do: {:error, "Missing players"}
 
   # def leave(%Game{players: players} = game, player) when player in @players do
   #   {:ok, %{game | players: Enum.reject(players, fn f -> f.name == player end)}}

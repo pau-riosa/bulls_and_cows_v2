@@ -1,12 +1,12 @@
 defmodule BullsAndCowsV2.Server do
   use GenServer
   alias BullsAndCowsV2.{Player, Game}
+  alias Phoenix.PubSub
   alias __MODULE__
   require Logger
 
   @impl true
   def init(%{player: player, code: code}) do
-    # Create the new game state with the creating player assigned
     {:ok, Game.new(code, player)}
   end
 
@@ -38,10 +38,10 @@ defmodule BullsAndCowsV2.Server do
     end
   end
 
-  def via_tuple(game_code), do: {:via, Horde.Registry, {BullsAndCowsV2.GameRegistry, game_code}}
+  def via_tuple(game_code), do: {:via, Registry, {BullsAndCowsV2.GameRegistry, game_code}}
 
   def start_or_join(game_code, %Player{} = player) do
-    case Horde.DynamicSupervisor.start_child(
+    case DynamicSupervisor.start_child(
            BullsAndCowsV2.DistributedSupervisor,
            {Server, [name: game_code, player: player]}
          ) do
@@ -52,12 +52,23 @@ defmodule BullsAndCowsV2.Server do
       :ignore ->
         Logger.info("Game Server #{inspect(game_code)} already running. Joining")
 
-        {:ok, :joined}
-        # case join_game(game_code, player) do
-        #   :ok -> {:ok, :joined}
-        #   {:error, _reason} = error -> error
-        # end
+        case join_game(game_code, player) do
+          :ok -> {:ok, :joined}
+          {:error, _reason} = error -> error
+        end
     end
+  end
+
+  @doc """
+  Join a running game server
+  """
+  @spec join_game(Game.game_code(), Player.t()) :: :ok | {:error, String.t()}
+  def join_game(game_code, %Player{} = player) do
+    GenServer.call(via_tuple(game_code), {:join_game, player})
+  end
+
+  def broadcast_game_state(%Game{} = state) do
+    PubSub.broadcast(BullsAndCowsV2.PubSub, "game:#{state.code}", {:game_state, state})
   end
 
   @doc """
@@ -66,7 +77,7 @@ defmodule BullsAndCowsV2.Server do
   @spec server_found?(Game.game_code()) :: boolean()
   def server_found?(game_code) do
     # Look up the game in the registry. Return if a match is found.
-    case Horde.Registry.lookup(BullsAndCowsV2.GameRegistry, game_code) do
+    case Registry.lookup(BullsAndCowsV2.GameRegistry, game_code) do
       [] -> false
       [{pid, _} | _] when is_pid(pid) -> true
     end
@@ -112,6 +123,19 @@ defmodule BullsAndCowsV2.Server do
   @impl true
   def handle_call(:current_state, _from, %Game{} = state) do
     {:reply, state, state}
+  end
+
+  @impl true
+  def handle_call({:join_game, %Player{} = player}, _from, %Game{} = state) do
+    with {:ok, new_state} <- Game.join_game(state, player),
+         {:ok, started} <- Game.start(new_state) do
+      broadcast_game_state(started)
+      {:reply, :ok, started}
+    else
+      {:error, reason} = error ->
+        Logger.error("Failed to join and start game. Error: #{inspect(reason)}")
+        {:reply, error, state}
+    end
   end
 
   # def join(id) do
