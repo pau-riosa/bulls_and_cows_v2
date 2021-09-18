@@ -1,17 +1,19 @@
 <div class="form-section">
-  <%= f = form_for :setup_game, "#", phx_change: "validate", phx_submit: "submit" %>
+  <%= f = form_for @changeset, "#", phx_change: "validate", phx_submit: "submit" %>
     <fieldset>
       <div class="row">
         <div class="column">
           <label for="game_code">Game Code</label>
           <%= text_input f, :game_code, placeholder: "1234asdf" %>
+          <%= error_tag f, :game_code %>
         </div>
         <div class="column">
           <label for="player_name">Player Name</label>
-          <%= text_input f, :player_name, placeholder: "Juan Dela Cruz" %>
+          <%= text_input f, :name, placeholder: "Juan Dela Cruz" %>
+          <%= error_tag f, :name %>
         </div>
       </div>
-      <input class="button-primary" type="submit" value="Send">
+      <input class="button-primary" type="submit" value="Join">
     </fieldset>
   </form>
 </div>

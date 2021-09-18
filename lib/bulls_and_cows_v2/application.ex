@@ -6,6 +6,8 @@ defmodule BullsAndCowsV2.Application do
   use Application
 
   def start(_type, _args) do
+    topologies = Application.get_env(:libcluster, :topologies) || []
+
     children = [
       # Start the Ecto repository
       BullsAndCowsV2.Repo,
@@ -13,6 +15,15 @@ defmodule BullsAndCowsV2.Application do
       BullsAndCowsV2Web.Telemetry,
       # Start the PubSub system
       {Phoenix.PubSub, name: BullsAndCowsV2.PubSub},
+      {Cluster.Supervisor, [topologies, [name: BullsAndCowsV2.ClusterSupervisor]]},
+      {Horde.Registry, [name: BullsAndCowsV2.GameRegistry, keys: :unique, members: :auto]},
+      {Horde.DynamicSupervisor,
+       [
+         name: BullsAndCowsV2.DistributedSupervisor,
+         shutdown: 1_000,
+         strategy: :one_for_one,
+         members: :auto
+       ]},
       # Start the Endpoint (http/https)
       BullsAndCowsV2Web.Endpoint
       # Start a worker by calling: BullsAndCowsV2.Worker.start_link(arg)

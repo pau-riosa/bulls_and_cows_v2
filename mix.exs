@@ -36,6 +36,7 @@ defmodule BullsAndCowsV2.MixProject do
       {:phoenix, "~> 1.5.12"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.4"},
+      {:ecto, "~> 3.5.8", override: true},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_live_view, "~> 0.15.1"},
       {:floki, ">= 0.30.0", only: :test},
@@ -46,7 +47,9 @@ defmodule BullsAndCowsV2.MixProject do
       {:telemetry_poller, "~> 0.4"},
       {:gettext, "~> 0.11"},
       {:jason, "~> 1.0"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:horde, "~> 0.8.4", override: true},
+      {:libcluster, "~> 3.2.2"}
     ]
   end
 
