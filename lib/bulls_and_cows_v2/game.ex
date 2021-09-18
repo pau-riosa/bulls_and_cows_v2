@@ -8,6 +8,7 @@ defmodule BullsAndCowsV2.Game do
             winner: nil,
             players: [],
             status: :not_started,
+            secret_number: nil,
             over: false
 
   @type game_code :: String.t()
@@ -17,11 +18,12 @@ defmodule BullsAndCowsV2.Game do
           players: [Player.t()],
           turn: nil | Player.t(),
           winner: nil | Player.t(),
-          over: Boolean.t()
+          over: Boolean.t(),
+          secret_number: nil | String.t()
         }
 
   def new(game_code, %Player{} = player) do
-    %Game{code: game_code, players: [player], turn: player}
+    %Game{code: game_code, players: [player], turn: player, secret_number: "1234"}
   end
 
   @doc """

@@ -7,40 +7,22 @@
   <% else %>
     <%= if @player do %>
       <div class="form-section">
-
           <div class="row">
             <div class="column">
-              <%= if @player.secret_number do %>
-                <label for="">Secret number set? <%= @player.secret_number %></label>
+              <%= if @game.secret_number do %>
+                <label for="">secret number is set</label>
               <% end %>
             </div>
           </div>
 
-        <%= f = form_for @secret_changeset, "#", phx_change: "validate_secret_number", phx_submit: "submit_secret_number" %>
-        <fieldset>
           <div class="row">
             <div class="column">
               <label for="">Player Name:</label>
-              <%= hidden_input f, :player, value: "#{@player.name}" %>
             </div>
             <div class="column">
               <label for=""><%= @player.name %></label>
             </div>
           </div>
-          <div class="row">
-            <div class="column">
-              <label for="">Set Secret Number:</label>
-            </div>
-            <div class="column">
-              <%= number_input f, :secret_number, placeholder: "1", min: 0, max: 9999 %>
-              <%= error_tag f, :secret_number %>
-            </div>
-            <div class="column">
-              <input class="button-primary" type="submit" value="Guess">
-            </div>
-          </div>
-        </fieldset>
-        </form>
       </div>
     <% end %>
     <div class="form-section">
