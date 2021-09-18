@@ -1,0 +1,51 @@
+<div class="form-section">
+  <%= f = form_for :guess, "#", phx_change: "validate", phx_submit: "submit" %>
+  <fieldset>
+    <div class="row">
+      <div class="column">
+        <%= number_input f, :number_1, placeholder: "1", min: 0, max: 9 %>
+      </div>
+      <div class="column">
+        <%= number_input f, :number_2, placeholder: "2", min: 0, max: 9 %>
+      </div>
+      <div class="column">
+        <%= number_input f, :number_3, placeholder: "3", min: 0, max: 9 %>
+      </div>
+      <div class="column">
+        <%= number_input f, :number_4, placeholder: "4", min: 0, max: 9 %>
+      </div>
+      <div class="column">
+        <input class="button-primary" type="submit" value="Guess">
+      </div>
+    </div>
+  </fieldset>
+  </form>
+</div>
+
+<div class="form-section">
+  <table>
+    <tr>
+      <td>Bulls</td>
+      <td>Cows</td>
+      <td colspan=4>Guess Number</td>
+    </tr>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>0</td>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+        <td>4</td>
+      </tr>
+      <tr>
+        <td>1</td>
+        <td>0</td>
+        <td>1</td>
+        <td>2</td>
+        <td>3</td>
+        <td>4</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
