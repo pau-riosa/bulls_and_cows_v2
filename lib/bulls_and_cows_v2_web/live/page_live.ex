@@ -11,7 +11,7 @@ defmodule BullsAndCowsV2Web.PageLive do
   def handle_event("submit", %{"game_starter" => params}, socket) do
     with {:ok, starter} <- GameStarter.create(params),
          {:ok, game_code} <- GameStarter.get_game_code(starter),
-         {:ok, player} <- Player.create(%{name: starter.name}),
+         {:ok, player} <- Player.create(%{name: starter.name, guesses: []}),
          {:ok, _} <- Server.start_or_join(game_code, player) do
       {:noreply,
        push_redirect(socket,

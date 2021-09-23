@@ -22,7 +22,6 @@ defmodule BullsAndCowsV2Web.GameLive do
        player: nil,
        reason: nil,
        game: %Game{},
-       secret_changeset: Player.secret_number_changeset(player),
        server_found: Server.server_found?(game_code)
      )}
   end
@@ -39,6 +38,7 @@ defmodule BullsAndCowsV2Web.GameLive do
     with %Game{} = game <- Server.get_current_game_state(game_code),
          player <- Game.get_player(game, player_id),
          {:ok, game_state} <- Server.make_guess(game_code, player, guess_number) do
+      send(self(), :load_game_state)
       {:noreply, assign(socket, game: game_state)}
     else
       {:error, reason} ->
@@ -83,38 +83,4 @@ defmodule BullsAndCowsV2Web.GameLive do
 
     {:noreply, updated_socket}
   end
-
-  # @impl true
-  # def handle_event(
-  #       "validate_secret_number",
-  #       %{"player" => player_params} = _params,
-  #       socket
-  #     ) do
-  #   player = socket.assigns.player
-
-  #   changeset =
-  #     Player.secret_number_changeset(player, player_params) |> Map.put(:action, :validate)
-
-  #   {:noreply, assign(socket, secret_changeset: changeset)}
-  # end
-
-  # @impl true
-  # def handle_event(
-  #       "submit_secret_number",
-  #       %{"player" => player_params} = _params,
-  #       socket
-  #     ) do
-  #   player = socket.assigns.player
-  #   game = socket.assigns.game
-
-  #   case Player.update(player, player_params) do
-  #     {:ok, player} ->
-  #       updated_game = Game.update_player(game, player)
-  #       send(self(), {:game_state, updated_game})
-  #       {:noreply, assign(socket, game: updated_game, player: player)}
-
-  #     {:error, changeset} ->
-  #       {:noreply, assign(socket, secret_changeset: changeset)}
-  #   end
-  # end
 end

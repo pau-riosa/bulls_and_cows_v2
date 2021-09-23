@@ -12,15 +12,15 @@ defmodule BullsAndCowsV2.Rules do
   end
 
   defp do_score_guess(secret_number, guess_number) do
-    secret_number = String.codepoints(secret_number)
-    guess_number = String.codepoints(guess_number)
+    new_secret_number = String.codepoints(secret_number)
+    new_guess_number = String.codepoints(guess_number)
 
-    secret_number
-    |> Enum.zip(guess_number)
+    new_secret_number
+    |> Enum.zip(new_guess_number)
     |> Enum.reduce({0, 0}, fn {s, g}, {bulls, cows} ->
       cond do
         g == s -> {bulls + 1, cows}
-        g in secret_number -> {bulls, cows + 1}
+        g in new_secret_number -> {bulls, cows + 1}
         true -> {bulls, cows}
       end
     end)

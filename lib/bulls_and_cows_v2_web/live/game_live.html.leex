@@ -7,22 +7,30 @@
   <% else %>
     <%= if @player do %>
       <div class="form-section">
-          <div class="row">
-            <div class="column">
-              <%= if @game.secret_number do %>
-                <label for="">secret number is set</label>
-              <% end %>
-            </div>
+        <div class="row">
+          <div class="column">
+            <%= if @game.over do %>
+              <label for="">GAME OVER winner is <%= @game.winner %></label>
+            <% end %>
           </div>
+        </div>
 
-          <div class="row">
-            <div class="column">
-              <label for="">Player Name:</label>
-            </div>
-            <div class="column">
-              <label for=""><%= @player.name %></label>
-            </div>
+        <div class="row">
+          <div class="column">
+            <%= if @game.secret_number do %>
+              <label for="">secret number is set</label>
+            <% end %>
           </div>
+        </div>
+
+        <div class="row">
+          <div class="column">
+            <label for="">Player Name:</label>
+          </div>
+          <div class="column">
+            <label for=""><%= @player.name %></label>
+          </div>
+        </div>
       </div>
     <% end %>
     <div class="form-section">
@@ -59,25 +67,16 @@
         <tr>
           <td>Bulls</td>
           <td>Cows</td>
-          <td colspan=4>Guess Number</td>
+          <td>Guess Number</td>
         </tr>
         <tbody>
-          <tr>
-            <td>1</td>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-          </tr>
-          <tr>
-            <td>1</td>
-            <td>0</td>
-            <td>1</td>
-            <td>2</td>
-            <td>3</td>
-            <td>4</td>
-          </tr>
+          <%= for {{bull, cow}, guess_number} <- @player.guesses do %>
+            <tr>
+              <td><%= bull %></td>
+              <td><%= cow %></td>
+              <td><%= guess_number %></td>
+            </tr>
+          <% end %>
         </tbody>
       </table>
     </div>
