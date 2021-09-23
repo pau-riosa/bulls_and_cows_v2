@@ -59,6 +59,10 @@ defmodule BullsAndCowsV2.Server do
     end
   end
 
+  def make_guess(game_code, %Player{} = player, guess_number) do
+    GenServer.call(via_tuple(game_code), {:make_guess, player, guess_number})
+  end
+
   @doc """
   Join a running game server
   """
@@ -138,6 +142,15 @@ defmodule BullsAndCowsV2.Server do
     end
   end
 
+  @impl true
+  def handle_call({:make_guess, player, guess_number}, _from, state) do
+    case Game.make_guess(state, player, guess_number) do
+      {:halt, new_state} -> {:reply, {:ok, new_state}, new_state}
+      {:continue, new_state} -> {:reply, {:ok, new_state}, new_state}
+      {:error, reason} -> {:reply, {:error, reason}, state}
+    end
+  end
+
   # def join(id) do
   #   GenServer.call(via_tuple(id), :join)
   # end
@@ -170,15 +183,6 @@ defmodule BullsAndCowsV2.Server do
   # @impl true
   # def handle_call(:get_state, _form, state) do
   #   {:reply, state, state}
-  # end
-
-  # @impl true
-  # def handle_call({:make_guess, player, guess_number}, _from, state) do
-  #   case Game.make_guess(state, player, guess_number) do
-  #     {:halt, new_state} -> {:reply, {:ok, new_state}, new_state}
-  #     {:continue, new_state} -> {:reply, {:ok, new_state}, new_state}
-  #     {:error, reason} -> {:reply, {:error, reason}, state}
-  #   end
   # end
 
   # @impl true
