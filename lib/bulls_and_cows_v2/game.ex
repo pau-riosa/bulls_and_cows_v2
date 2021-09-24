@@ -101,36 +101,17 @@ defmodule BullsAndCowsV2.Game do
     end
   end
 
-  def update_over(game), do: %{game | over: true}
-  def update_winner(game, winner), do: %{game | winner: winner}
-  def update_turn(game, player), do: %{game | turn: opposite_player(game, player)}
-  # def update_secret_number(game), do: %{game | secret_number: generate_secret()}
-
   def update_player_guesses(game, player, value, guess_number) do
-    find_player =
-      game.players
-      |> Enum.find(&(&1.id == player.id))
-
-    guesses =
-      find_player.guesses
-      |> Enum.filter(&(not is_nil(&1)))
-
-    updated_player = %{find_player | guesses: [{value, guess_number} | guesses]}
-
-    updated_players =
-      Enum.map(game.players, fn x ->
-        if x.id == player.id, do: updated_player, else: x
-      end)
-
-    %{game | players: updated_players}
-  end
-
-  def opposite_player(game, player) do
-    Enum.find(game.players, &(&1.id != player.id))
-  end
-
-  defp generate_secret() do
-    Enum.take_random(0..9, 4) |> Enum.reduce("", fn x, acc -> "#{acc}#{x}" end)
+    with %Player{} = found_player <- Enum.find(game.players, &(&1.id == player.id)),
+         guesses <- Enum.filter(found_player.guesses, &(not is_nil(&1))),
+         %Player{} = updated_player <-
+           %{found_player | guesses: [{value, guess_number} | guesses]},
+         updated_players <-
+           Enum.map(game.players, fn x -> if x.id == player.id, do: updated_player, else: x end) do
+      %{game | players: updated_players}
+    else
+      _ -> {:error, "something went wrong"}
+    end
   end
 
   defp check_winner(game) do
@@ -138,31 +119,41 @@ defmodule BullsAndCowsV2.Game do
     player_2 = Enum.at(game.players, 1)
 
     guesses_1 =
-      if not is_nil(player_1.guesses) and player_1.guesses |> Enum.find(fn x -> {4, 0} == x end) do
-        player_1.guesses |> Enum.count()
-      else
-        0
-      end
+      player_1.guesses
+      |> find_bulls()
 
     guesses_2 =
-      if not is_nil(player_2.guesses) and player_2.guesses |> Enum.find(fn x -> {4, 0} == x end) do
-        player_2.guesses |> Enum.count()
-      else
-        0
-      end
+      player_2.guesses
+      |> find_bulls()
 
     case {guesses_1, guesses_2} do
-      {guesses_1, guesses_2} when not is_nil(guesses_1) and not is_nil(guesses_2) ->
-        winner =
-          if guesses_1 > guesses_2,
-            do: player_1.name,
-            else: player_2.name
+      {guesses_1, guesses_2} when not is_nil(guesses_1) and is_nil(guesses_2) ->
+        declare_winner(game, player_1.name)
 
-        game = %{game | status: :done}
-        game |> update_winner(winner) |> update_over
+      {guesses_1, guesses_2} when is_nil(guesses_1) and not is_nil(guesses_2) ->
+        declare_winner(game, player_2.name)
 
       _ ->
         game
     end
   end
+
+  defp opposite_player(game, player), do: Enum.find(game.players, &(&1.id != player.id))
+
+  defp generate_secret(),
+    do: Enum.take_random(0..9, 4) |> Enum.reduce("", fn x, acc -> "#{acc}#{x}" end)
+
+  defp update_over(game), do: %{game | over: true}
+  defp update_status(game, status), do: %{game | status: status}
+  defp update_winner(game, winner), do: %{game | winner: winner}
+  defp update_turn(game, player), do: %{game | turn: opposite_player(game, player)}
+
+  defp find_bulls(guesses),
+    do:
+      guesses
+      |> Enum.filter(&(not is_nil(&1)))
+      |> Enum.find(&(elem(&1, 0) == {4, 0}))
+
+  defp declare_winner(game, winner),
+    do: game |> update_winner(winner) |> update_over |> update_status(:done)
 end
