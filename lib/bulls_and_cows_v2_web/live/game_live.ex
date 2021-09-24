@@ -7,9 +7,6 @@ defmodule BullsAndCowsV2Web.GameLive do
 
   @impl true
   def mount(%{"game" => game_code, "player" => player_id}, _session, socket) do
-    game_state = Server.get_current_game_state(game_code)
-    player = Enum.find(game_state.players, fn f -> f.id == player_id end)
-
     if connected?(socket) do
       PubSub.subscribe(BullsAndCowsV2.PubSub, "game:#{game_code}")
       send(self(), :load_game_state)
@@ -39,6 +36,8 @@ defmodule BullsAndCowsV2Web.GameLive do
          player <- Game.get_player(game, player_id),
          {:ok, game_state} <- Server.make_guess(game_code, player, guess_number) do
       send(self(), :load_game_state)
+      Server.broadcast_game_state(game_state)
+
       {:noreply, assign(socket, game: game_state)}
     else
       {:error, reason} ->
@@ -72,6 +71,11 @@ defmodule BullsAndCowsV2Web.GameLive do
     # Schedule to check again
     Process.send_after(self(), :load_game_state, 500)
     {:noreply, assign(socket, :server_found, Server.server_found?(socket.assigns.game_code))}
+  end
+
+  @impl true
+  def handle_info(%{event: "game_state", payload: state} = _event, socket) do
+    {:noreply, assign(socket, state)}
   end
 
   @impl true
